@@ -1,10 +1,142 @@
 [
-  { "name": "Юра Таран",      "gh": "halfrollboy", "sub": "" },
-  { "name": "Dimitriy",       "gh": "ShadowRus",   "sub": "" },
-  { "name": "Виталий",        "gh": "vrazraz",     "sub": "" },
-  { "name": "Андрей",         "gh": "Don200",      "sub": "" },
-  { "name": "Эмиль",          "gh": "EmilMind",    "sub": "" },
-  { "name": "Artur",          "gh": "192117",      "sub": "" },
-  { "name": "Dmitry",         "gh": "dwdSF",       "sub": "" },
-  { "name": "Артем Харланов", "gh": "",            "sub": "" }
+  {
+    "name": "Юра Таран",
+    "gh": "halfrollboy",
+    "sub": "Claude Pro Cursor/Qwen Cloud"
+  },
+  {
+    "name": "Dimitriy",
+    "gh": "ShadowRus",
+    "sub": "Cursor Ultra"
+  },
+  {
+    "name": "Эмиль Миндубаев",
+    "gh": "EmilMind",
+    "sub": "Codex Plus Cursor"
+  },
+  {
+    "name": "Artur",
+    "gh": "192117",
+    "sub": "Codex Plus"
+  },
+  {
+    "name": "Артем Харланов",
+    "gh": "ArtemiliaH",
+    "sub": "Cursor Ultra"
+  },
+  {
+    "name": "Влад Пивоваров",
+    "gh": "VladPv4",
+    "sub": "Claude Pro Cursor"
+  },
+  {
+    "name": "Денис Кашанин",
+    "gh": "denis-cash",
+    "sub": "Claude Pro DepSeek per tokens"
+  },
+  {
+    "name": "Шавкат Риятов",
+    "gh": "shavkat-r",
+    "sub": "Codex Plus +Claude Pro"
+  },
+  {
+    "name": "Югов Николай",
+    "gh": "SIISN",
+    "sub": "Claude Max 5"
+  },
+  {
+    "name": "Кирилл Пономарёв",
+    "gh": "gitscure",
+    "sub": "Claude Pro"
+  },
+  {
+    "name": "Хренников Александр",
+    "gh": "lichbanned",
+    "sub": "cursor"
+  },
+  {
+    "name": "Матыцин Виталий",
+    "gh": "vrazraz",
+    "sub": "Claude Max 5 +codex+grok+opencode"
+  },
+  {
+    "name": "Пущин Никита",
+    "gh": "nikitaalp92",
+    "sub": "Codex Plus"
+  },
+  {
+    "name": "Белов Никита",
+    "gh": "NBelovKTS",
+    "sub": "cursor"
+  },
+  {
+    "name": "Елшин Александр",
+    "gh": "UniQlow17",
+    "sub": "cursor"
+  },
+  {
+    "name": "Малышок Екатерина",
+    "gh": "malyshoke",
+    "sub": "Codex Plus"
+  },
+  {
+    "name": "Игонин Юрий",
+    "gh": "worrum",
+    "sub": "Codex Pro 20 +Claude Max 5 + Gemini Pro"
+  },
+  {
+    "name": "Эдуард Пометун",
+    "gh": "alukard2538",
+    "sub": "Бесплатные модели в opencode"
+  },
+  {
+    "name": "Глебов Иван",
+    "gh": "livingtonds",
+    "sub": "Codex Pro 5 Zai, opencode with our mlops models"
+  },
+  {
+    "name": "Назипов Владислав",
+    "gh": "vladushka2000",
+    "sub": "opencode + deepseek, claude per token (другой провайдер)"
+  },
+  {
+    "name": "Виктор Медянкин",
+    "gh": "vitomed",
+    "sub": "Claude Pro"
+  },
+  {
+    "name": "Илья Мясников",
+    "gh": "berrim0r",
+    "sub": "дипсик без подписки"
+  },
+  {
+    "name": "Конюх Валентин",
+    "gh": "One-Ray-93",
+    "sub": "дипсик без подписки"
+  },
+  {
+    "name": "Бовсуновский Александр",
+    "gh": "Bovsunovskii",
+    "sub": "Claude Pro"
+  },
+  {
+    "name": "Александр Крючин",
+    "gh": "AlexanderKruchin",
+    "sub": "гугл"
+  },
+  {
+    "name": "Терещенко Ярослав",
+    "gh": "KernelPanic111",
+    "sub": "дипсик без подписки"
+  },
+  {
+    "name": "Канафиев Глеб",
+    "gh": "kaglar-g",
+    "sub": "чатгпт, дипсик без подписки"
+  },
+  {
+    "name": "Максим Улизько",
+    "gh": "thecontrey",
+    "sub": "Codex Plus плюс claude pro"
+  }
 ]
