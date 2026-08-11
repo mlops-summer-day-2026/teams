@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Жеребьёвка команд · MLOps Summer Day 2026</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a12;
+    --card: #14141f;
+    --line: #262636;
+    --ink: #f2f2f7;
+    --dim: #8a8aa0;
+    --hot: #ff5c39;
+    --cool: #4d7cff;
+    --gold: #ffc046;
+    --ok: #35d07f;
+  }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(900px 500px at 12% -5%, rgba(255,92,57,.20), transparent 60%),
+      radial-gradient(800px 500px at 88% 0%, rgba(77,124,255,.18), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* ---------- шапка ---------- */
+  header { text-align: center; margin-bottom: 28px; }
+
+  .kicker {
+    font-size: 13px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 10px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(38px, 7vw, 76px);
+    line-height: .95;
+    letter-spacing: -.03em;
+    font-weight: 800;
+    background: linear-gradient(95deg, var(--hot), var(--gold) 45%, var(--cool));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .sub { margin-top: 12px; color: var(--dim); font-size: 17px; }
+
+  /* ---------- пульт ---------- */
+  .console {
+    display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: center;
+    margin: 28px 0 8px;
+  }
+
+  button {
+    font: inherit; font-weight: 600; cursor: pointer;
+    border-radius: 12px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink);
+    padding: 13px 20px; transition: .15s;
+  }
+  button:hover:not(:disabled) { border-color: #43435c; transform: translateY(-1px); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+
+  .go {
+    background: linear-gradient(95deg, var(--hot), #ff8a3d);
+    border: none; color: #fff;
+    font-size: 20px; font-weight: 800; letter-spacing: .02em;
+    padding: 17px 44px; border-radius: 14px;
+    box-shadow: 0 10px 34px rgba(255,92,57,.36);
+  }
+  .go:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 14px 42px rgba(255,92,57,.46); }
+
+  .field {
+    display: flex; align-items: center; gap: 9px;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 9px 15px;
+  }
+  .field label { color: var(--dim); font-size: 14px; }
+  .field input {
+    width: 58px; background: transparent; border: none; color: var(--ink);
+    font: 700 18px/1 inherit; text-align: center; outline: none;
+  }
+
+  /* ---------- сводка ---------- */
+  .tally {
+    display: flex; gap: 26px; justify-content: center; flex-wrap: wrap;
+    color: var(--dim); font-size: 14px; margin-bottom: 26px;
+  }
+  .tally b { color: var(--ink); font-size: 17px; }
+  .tally .warn { color: var(--gold); }
+
+  /* ---------- сетка команд ---------- */
+  .grid {
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  }
+
+  .team {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px;
+    opacity: 0;
+    transform: translateY(14px) scale(.98);
+    animation: drop .42s cubic-bezier(.22,1.2,.4,1) forwards;
+  }
+  @keyframes drop { to { opacity: 1; transform: none; } }
+
+  .team.locking { border-color: var(--hot); box-shadow: 0 0 0 1px var(--hot), 0 0 34px rgba(255,92,57,.28); }
+
+  .team h2 {
+    margin: 0 0 3px; font-size: 20px; font-weight: 800; letter-spacing: -.01em;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  }
+  .team h2 .n { color: var(--dim); font-size: 13px; font-weight: 600; }
+  .team h2 a { color: var(--dim); font-size: 13px; font-weight: 600; text-decoration: none; }
+  .team h2 a:hover { color: var(--cool); }
+
+  .roster { list-style: none; margin: 14px 0 0; padding: 0; }
+
+  .person {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 0; border-top: 1px solid rgba(255,255,255,.05);
+    font-size: 15px;
+  }
+  .person:first-child { border-top: none; }
+  .person .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .person .gh { color: var(--dim); font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  .person.captain { font-weight: 700; }
+  .person.captain .nm { color: var(--gold); }
+
+  .tag {
+    font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    padding: 3px 7px; border-radius: 5px; white-space: nowrap;
+  }
+  .tag.max { background: rgba(255,192,70,.16); color: var(--gold); }
+  .tag.pro { background: rgba(77,124,255,.16); color: #8fabff; }
+
+  .spin { color: var(--dim); font-family: ui-monospace, monospace; }
+
+  /* ---------- список участников ---------- */
+  details.people {
+    margin-top: 40px; background: var(--card);
+    border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px;
+  }
+  details.people summary { cursor: pointer; font-weight: 700; color: var(--dim); }
+  details.people summary:hover { color: var(--ink); }
+  details.people p { color: var(--dim); font-size: 14px; }
+
+  textarea {
+    width: 100%; min-height: 190px; margin-top: 12px;
+    background: #0d0d16; color: var(--ink);
+    border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+    font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+    resize: vertical; outline: none;
+  }
+  textarea:focus { border-color: #43435c; }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+  .note { color: var(--dim); font-size: 13px; }
+  .note.good { color: var(--ok); }
+  .note.bad { color: var(--hot); }
+
+  footer { margin-top: 34px; text-align: center; color: var(--dim); font-size: 13px; }
+  footer code { color: var(--ink); font-family: ui-monospace, monospace; }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    body::before, .console, details.people, .go { display: none; }
+    .team { border: 1px solid #ccc; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">14 августа 2026 · Вайбкодинг-тимбилдинг</div>
+    <h1>Строим для своих</h1>
+    <div class="sub">Капитаны — по подписке. Все остальные — как ляжет.</div>
+  </header>
+
+  <div class="console">
+    <div class="field">
+      <label for="cnt">Команд</label>
+      <input id="cnt" type="number" min="2" max="24" value="10">
+    </div>
+    <button class="go" id="go">Крутить</button>
+    <button id="copy">Скопировать состав</button>
+    <button id="print">Распечатать</button>
+  </div>
+
+  <div class="tally" id="tally"></div>
+
+  <div class="grid" id="grid"></div>
+
+  <details class="people" id="panel">
+    <summary>Список участников</summary>
+    <p>
+      Открой <a href="https://docs.google.com/spreadsheets/d/1GIsuqAtjAdVU7VJhHgqknojh20QKeWyHFNX_kUPFhts/edit" target="_blank" rel="noopener">таблицу сбора</a>,
+      выдели строки, скопируй и вставь сюда. Три колонки: имя, GitHub-логин, подписка.
+      Порядок колонок не важен — Max и Pro распознаются по значению.
+    </p>
+    <textarea id="raw" spellcheck="false" placeholder="Юра Таран	halfrollboy	Max&#10;Виталий	vrazraz	Pro&#10;…"></textarea>
+    <div class="row">
+      <button id="apply">Применить список</button>
+      <button id="reset">Вернуть сохранённый</button>
+      <span class="note" id="status"></span>
+    </div>
+  </details>
+
+  <footer>
+    Жеребьёвка честная и воспроизводимая: сид <code id="seedout">—</code>.
+    Тот же сид с тем же списком всегда даёт тот же результат.
+  </footer>
+
+</div>
+
+<script>
+const ORG = 'mlops-summer-day-2026';
+
+/* ---------- генератор с сидом: одинаковый сид даёт одинаковый расклад ---------- */
+function rng(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffle(list, rand) {
+  const a = list.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ---------- разбор вставленного списка ---------- */
+function parse(text) {
+  const out = [];
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const cells = (line.includes('\t') ? line.split('\t') : line.split(','))
+      .map(c => c.trim().replace(/^"|"$/g, ''));
+    if (!cells.some(Boolean)) continue;
+
+    // заголовок таблицы пропускаем
+    const low = cells.join(' ').toLowerCase();
+    if (low.includes('github') && (low.includes('имя') || low.includes('name'))) continue;
+
+    // подписку ищем по значению, а не по номеру колонки
+    let sub = '';
+    let subIdx = -1;
+    cells.forEach((c, i) => {
+      if (/^max$/i.test(c)) { sub = 'Max'; subIdx = i; }
+      else if (/^pro$/i.test(c)) { sub = 'Pro'; subIdx = i; }
+      else if (/^нет/i.test(c)) { sub = ''; subIdx = i; }
+    });
+
+    const left = cells.filter((_, i) => i !== subIdx);
+    // логин — латиница без пробелов; имя — всё остальное
+    let gh = '', name = '';
+    for (const c of left) {
+      if (!c) continue;
+      if (!gh && /^[A-Za-z0-9][A-Za-z0-9-]*$/.test(c) && name) gh = c;
+      else if (!name) name = c;
+      else if (!gh) gh = c;
+    }
+    if (!name && gh) { name = gh; gh = ''; }
+    if (!name) continue;
+    out.push({ name, gh, sub });
+  }
+  return out;
+}
+
+function serialize(people) {
+  return people.map(p => [p.name, p.gh, p.sub].join('\t')).join('\n');
+}
+
+/* ---------- раскладка по командам ---------- */
+function assign(people, teamCount, seed) {
+  const rand = rng(seed);
+  const maxes = shuffle(people.filter(p => p.sub === 'Max'), rand);
+  const pros  = shuffle(people.filter(p => p.sub === 'Pro'), rand);
+  const rest  = shuffle(people.filter(p => p.sub !== 'Max' && p.sub !== 'Pro'), rand);
+
+  const teams = Array.from({ length: teamCount }, () => ({ captain: null, members: [] }));
+
+  // капитаны: сначала Max, если не хватило — Pro, потом кто остался
+  const pool = [...maxes, ...pros, ...rest];
+  const taken = new Set();
+  for (let i = 0; i < teamCount && i < pool.length; i++) {
+    teams[i].captain = pool[i];
+    taken.add(pool[i]);
+  }
+
+  // остальных раздаём по кругу, слой за слоем — так подписки размазываются ровно
+  let cursor = 0;
+  for (const layer of [maxes, pros, rest]) {
+    for (const p of layer) {
+      if (taken.has(p)) continue;
+      teams[cursor % teamCount].members.push(p);
+      cursor++;
+    }
+  }
+  return teams;
+}
+
+/* ---------- состояние ---------- */
+let people = [];
+let teams = [];
+let seed = 0;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+async function boot() {
+  const saved = localStorage.getItem('people');
+  if (saved) {
+    people = JSON.parse(saved);
+  } else {
+    try {
+      const r = await fetch('participants.json', { cache: 'no-store' });
+      if (r.ok) people = await r.json();
+    } catch (e) { /* файла нет — работаем со вставкой */ }
+  }
+  $('raw').value = serialize(people);
+
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const n = parseInt(hash.get('n'), 10);
+  const s = parseInt(hash.get('seed'), 10);
+  if (n) $('cnt').value = n;
+
+  countUp();
+  if (s) { seed = s; draw(false); }
+  if (!people.length) $('panel').open = true;
+}
+
+function countUp() {
+  const m = people.filter(p => p.sub === 'Max').length;
+  const p = people.filter(p => p.sub === 'Pro').length;
+  const n = parseInt($('cnt').value, 10) || 10;
+  const short = m < n
+    ? `<span class="warn">Max меньше, чем команд — ${n - m} капитан(ов) возьмём из Pro</span>`
+    : '';
+  $('tally').innerHTML =
+    `<span><b>${people.length}</b> участников</span>` +
+    `<span><b>${m}</b> с Max</span>` +
+    `<span><b>${p}</b> с Pro</span>` +
+    `<span><b>${people.length - m - p}</b> без подписки</span>` +
+    (short ? `<span>${short}</span>` : '');
+  $('go').disabled = people.length === 0;
+}
+
+function personHTML(p, isCap) {
+  const tag = p.sub === 'Max' ? '<span class="tag max">Max</span>'
+            : p.sub === 'Pro' ? '<span class="tag pro">Pro</span>' : '';
+  return `<li class="person${isCap ? ' captain' : ''}">
+      <span class="nm">${isCap ? '👑 ' : ''}${esc(p.name)}</span>
+      ${p.gh ? `<span class="gh">${esc(p.gh)}</span>` : ''}${tag}
+    </li>`;
+}
+
+function render() {
+  $('grid').innerHTML = teams.map((t, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    const roster = (t.captain ? personHTML(t.captain, true) : '')
+                 + t.members.map(p => personHTML(p, false)).join('');
+    return `<div class="team" style="animation-delay:${i * 55}ms">
+        <h2>
+          <span>Команда ${i + 1}</span>
+          <a href="https://github.com/${ORG}/team-${num}" target="_blank" rel="noopener">team-${num}</a>
+        </h2>
+        <span class="n">${(t.captain ? 1 : 0) + t.members.length} человек</span>
+        <ul class="roster">${roster || '<li class="person"><span class="nm spin">пусто</span></li>'}</ul>
+      </div>`;
+  }).join('');
+}
+
+/* барабан: имена мелькают, потом команды фиксируются одна за другой */
+function spinThen(done) {
+  const n = parseInt($('cnt').value, 10) || 10;
+  const names = people.map(p => p.name);
+  const pick = () => names[Math.floor(Math.random() * names.length)] || '···';
+
+  $('grid').innerHTML = Array.from({ length: n }, (_, i) =>
+    `<div class="team" style="animation-delay:${i * 30}ms">
+       <h2><span>Команда ${i + 1}</span></h2>
+       <ul class="roster" data-slot="${i}">${
+         Array.from({ length: 5 }, () => `<li class="person"><span class="nm spin">${esc(pick())}</span></li>`).join('')
+       }</ul>
+     </div>`).join('');
+
+  const timer = setInterval(() => {
+    document.querySelectorAll('.spin').forEach(el => { el.textContent = pick(); });
+  }, 70);
+
+  setTimeout(() => { clearInterval(timer); done(); }, 1400);
+}
+
+function draw(animate = true) {
+  const n = Math.max(2, Math.min(24, parseInt($('cnt').value, 10) || 10));
+  $('cnt').value = n;
+  teams = assign(people, n, seed);
+  $('seedout').textContent = seed;
+  location.hash = `seed=${seed}&n=${n}`;
+  countUp();
+
+  if (!animate) { render(); return; }
+  render();
+  // подсветка карточек по очереди
+  document.querySelectorAll('.team').forEach((el, i) => {
+    setTimeout(() => {
+      el.classList.add('locking');
+      setTimeout(() => el.classList.remove('locking'), 420);
+    }, i * 90);
+  });
+}
+
+/* ---------- обработчики ---------- */
+$('go').onclick = () => {
+  $('go').disabled = true;
+  seed = Math.floor(Math.random() * 9000) + 1000;
+  spinThen(() => { draw(true); $('go').disabled = false; $('go').textContent = 'Крутить заново'; });
+};
+
+$('cnt').onchange = () => { countUp(); if (teams.length) draw(false); };
+
+$('apply').onclick = () => {
+  const parsed = parse($('raw').value);
+  if (!parsed.length) {
+    $('status').className = 'note bad';
+    $('status').textContent = 'Не нашёл ни одной строки. Нужны имя, логин и подписка.';
+    return;
+  }
+  people = parsed;
+  localStorage.setItem('people', JSON.stringify(people));
+  countUp();
+  $('status').className = 'note good';
+  $('status').textContent = `Принято: ${people.length} человек.`;
+};
+
+$('reset').onclick = async () => {
+  localStorage.removeItem('people');
+  people = [];
+  try {
+    const r = await fetch('participants.json', { cache: 'no-store' });
+    if (r.ok) people = await r.json();
+  } catch (e) {}
+  $('raw').value = serialize(people);
+  countUp();
+  $('status').className = 'note';
+  $('status').textContent = 'Вернул список из репозитория.';
+};
+
+$('copy').onclick = () => {
+  if (!teams.length) return;
+  const text = teams.map((t, i) => {
+    const lines = [`Команда ${i + 1}`];
+    if (t.captain) lines.push(`  капитан: ${t.captain.name}${t.captain.gh ? ' (' + t.captain.gh + ')' : ''}`);
+    t.members.forEach(p => lines.push(`  ${p.name}${p.gh ? ' (' + p.gh + ')' : ''}`));
+    return lines.join('\n');
+  }).join('\n\n') + `\n\nсид: ${seed}`;
+  navigator.clipboard.writeText(text).then(() => {
+    $('copy').textContent = 'Скопировано';
+    setTimeout(() => { $('copy').textContent = 'Скопировать состав'; }, 1600);
+  });
+};
+
+$('print').onclick = () => window.print();
+
+boot();
+</script>
+</body>
+</html>
