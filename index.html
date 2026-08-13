@@ -230,8 +230,6 @@
     <button class="go" id="go">Крутить</button>
     <button id="mask">Рубашкой вверх</button>
     <button class="danger" id="resetdeck">Сбросить колоду</button>
-    <button id="copy">Скопировать состав</button>
-    <button id="print">Распечатать</button>
   </div>
 
   <div class="tally" id="tally"></div>
@@ -609,24 +607,6 @@ $('reset').onclick = async () => {
   $('status').className = 'note';
   $('status').textContent = 'Вернул список из репозитория.';
 };
-
-$('copy').onclick = () => {
-  if (!teams.length) return;
-  const text = teams.map((t, i) => {
-    const lines = [`Команда ${i + 1}`];
-    if (t.captain) lines.push(`  капитан: ${t.captain.name}${t.captain.gh ? ' (' + t.captain.gh + ')' : ''}`);
-    t.members.forEach(p => lines.push(`  ${p.name}${p.gh ? ' (' + p.gh + ')' : ''}`));
-    const c = cardById(dealt[i]);
-    if (c) lines.push(`  пасхалка: ${c.name}`);
-    return lines.join('\n');
-  }).join('\n\n') + `\n\nсид: ${seed}`;
-  navigator.clipboard.writeText(text).then(() => {
-    $('copy').textContent = 'Скопировано';
-    setTimeout(() => { $('copy').textContent = 'Скопировать состав'; }, 1600);
-  });
-};
-
-$('print').onclick = () => window.print();
 
 if (localStorage.getItem('masked') === '1') $('mask').textContent = 'Показать пасхалки';
 boot();
