@@ -182,6 +182,22 @@
   .reveal .rdesc { color: var(--ink); opacity: .82; font-size: 16px; line-height: 1.45; text-wrap: balance; }
   .reveal .rhint { color: var(--dim); font-size: 13px; margin-top: 18px; }
 
+  /* ---------- порядок защиты ---------- */
+  .queue { list-style: none; margin: 0; padding: 0; width: min(92vw, 640px); max-height: 76vh; overflow-y: auto; }
+  .qrow {
+    display: flex; align-items: center; gap: 16px; padding: 12px 20px; margin-bottom: 9px;
+    background: linear-gradient(120deg, rgba(77,124,255,.16), rgba(255,92,57,.07));
+    border: 1px solid rgba(77,124,255,.30); border-radius: 14px;
+    animation: slide .4s cubic-bezier(.22,1.2,.4,1) both;
+  }
+  @keyframes slide { from { opacity: 0; transform: translateX(-24px) } to { opacity: 1; transform: none } }
+  .qnum { font-size: 27px; font-weight: 800; color: var(--gold); min-width: 44px; text-align: center; }
+  .qteam { font-weight: 800; font-size: 19px; white-space: nowrap; }
+  .qcap { color: var(--dim); font-size: 14px; margin-left: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qhint { position: absolute; bottom: 5vh; color: var(--dim); font-size: 13px; }
+  .qhint button { padding: 6px 12px; font-size: 13px; margin-left: 8px; }
+  .qbadge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(77,124,255,.20); color: #8fabff; white-space: nowrap; }
+
   /* ---------- список участников ---------- */
   details.people { margin-top: 40px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
   details.people summary { cursor: pointer; font-weight: 700; color: var(--dim); }
@@ -228,6 +244,7 @@
       <input id="cnt" type="number" min="2" max="24" value="4">
     </div>
     <button class="go" id="go">Крутить</button>
+    <button id="order">🎤 Порядок защиты</button>
     <button id="mask">Рубашкой вверх</button>
     <button class="danger" id="resetdeck">Сбросить колоду</button>
   </div>
@@ -370,12 +387,14 @@ function assign(people, teamCount, seed) {
 /* ---------- состояние ---------- */
 let people = [], teams = [], seed = 0;
 let dealt = {};                       // индекс команды → id пасхалки
+let order = null;                     // порядок защиты: массив индексов команд
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 const cardById = id => DECK.find(c => c.id === id);
 const dealtIds = () => Object.values(dealt);
 const freeCards = () => DECK.filter(c => !dealtIds().includes(c.id));
 const saveDealt = () => localStorage.setItem('dealt', JSON.stringify(dealt));
+const saveOrder = () => localStorage.setItem('order', JSON.stringify(order));
 
 async function boot() {
   const saved = localStorage.getItem('people');
@@ -385,6 +404,7 @@ async function boot() {
     catch (e) {}
   }
   try { dealt = JSON.parse(localStorage.getItem('dealt') || '{}'); } catch (e) { dealt = {}; }
+  try { order = JSON.parse(localStorage.getItem('order') || 'null'); } catch (e) { order = null; }
   if (localStorage.getItem('masked') === '1') document.body.classList.add('masked');
 
   $('raw').value = serialize(people);
@@ -442,9 +462,11 @@ function render() {
     const num = String(i + 1).padStart(2, '0');
     const roster = (t.captain ? personHTML(t.captain, true) : '')
                  + t.members.map(p => personHTML(p, false)).join('');
+    const pos = order ? order.indexOf(i) : -1;
+    const badge = pos >= 0 ? `<span class="qbadge">защита ${pos + 1}-я</span>` : '';
     return `<div class="team" style="animation-delay:${i * 55}ms">
         <h2><span>Команда ${i + 1}</span>
-          <a href="https://github.com/${ORG}/team-${num}" target="_blank" rel="noopener">team-${num}</a></h2>
+          ${badge}<a href="https://github.com/${ORG}/team-${num}" target="_blank" rel="noopener">team-${num}</a></h2>
         <span class="n">${(t.captain ? 1 : 0) + t.members.length} человек</span>
         ${eggHTML(i)}
         <ul class="roster">${roster || '<li class="person"><span class="nm spin">пусто</span></li>'}</ul>
@@ -486,6 +508,56 @@ function dealCard(teamIndex) {
   }, 1900);
 }
 
+/* ---------- порядок защиты ---------- */
+function queueHTML(list) {
+  return list.map((ti, pos) => {
+    const t = teams[ti];
+    const cap = t && t.captain ? t.captain.name : '';
+    return `<li class="qrow" style="animation-delay:${pos * 55}ms">
+        <span class="qnum">${pos + 1}</span>
+        <span class="qteam">Команда ${ti + 1}</span>
+        <span class="qcap">${esc(cap)}</span>
+      </li>`;
+  }).join('');
+}
+
+function showOrder(fresh) {
+  if (!teams.length) return;
+  const idx = teams.map((_, i) => i);
+  const curtain = document.createElement('div');
+  curtain.className = 'curtain';
+  document.body.appendChild(curtain);
+
+  const paint = (list, done) => {
+    curtain.innerHTML = `<div class="who">Порядок защиты</div>
+      <ol class="queue">${queueHTML(list)}</ol>` +
+      (done ? `<div class="qhint">Нажми в любом месте, чтобы закрыть
+        <button class="again">перетянуть</button></div>` : '');
+  };
+
+  const finish = () => {
+    curtain.onclick = e => {
+      curtain.remove();
+      if (e.target.closest('.again')) showOrder(true);
+    };
+  };
+
+  if (!fresh && order && order.length === teams.length) { paint(order, true); finish(); return; }
+
+  let ticks = 0;
+  const timer = setInterval(() => {
+    paint(shuffle(idx, Math.random), false);
+    if (++ticks >= 12) {
+      clearInterval(timer);
+      order = shuffle(idx, Math.random);
+      saveOrder();
+      paint(order, true);
+      render();
+      finish();
+    }
+  }, 110);
+}
+
 function spinThen(done) {
   const n = parseInt($('cnt').value, 10) || 4;
   const names = people.map(p => p.name);
@@ -508,6 +580,8 @@ function draw(animate = true) {
   // карты команд, которых больше нет, возвращаются в колоду
   Object.keys(dealt).forEach(k => { if (+k >= n) delete dealt[k]; });
   saveDealt();
+  // порядок защиты, собранный под другое число команд, больше не годится
+  if (order && order.length !== n) { order = null; saveOrder(); }
 
   teams = assign(people, n, seed);
   $('seedout').textContent = seed;
@@ -558,6 +632,11 @@ $('go').onclick = () => {
 };
 
 $('cnt').onchange = () => { countUp(); if (teams.length) draw(false); };
+
+$('order').onclick = () => {
+  if (!teams.length) { flashBtn($('order'), 'Сначала «Крутить»', '🎤 Порядок защиты'); return; }
+  showOrder(false);
+};
 
 $('mask').onclick = () => {
   const on = document.body.classList.toggle('masked');
