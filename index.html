@@ -86,6 +86,10 @@
   .team .n { color: var(--dim); font-size: 13px; font-weight: 600; }
 
   .roster { list-style: none; margin: 14px 0 0; padding: 0; flex: 1; }
+  /* длинные составы не должны прятать карту под собой */
+  .roster { max-height: 46vh; overflow-y: auto; }
+  .roster::-webkit-scrollbar { width: 6px; }
+  .roster::-webkit-scrollbar-thumb { background: #33334a; border-radius: 3px; }
   .person { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-top: 1px solid rgba(255,255,255,.05); font-size: 15px; }
   .person:first-child { border-top: none; }
   .person .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -439,8 +443,8 @@ function render() {
         <h2><span>Команда ${i + 1}</span>
           <a href="https://github.com/${ORG}/team-${num}" target="_blank" rel="noopener">team-${num}</a></h2>
         <span class="n">${(t.captain ? 1 : 0) + t.members.length} человек</span>
-        <ul class="roster">${roster || '<li class="person"><span class="nm spin">пусто</span></li>'}</ul>
         ${eggHTML(i)}
+        <ul class="roster">${roster || '<li class="person"><span class="nm spin">пусто</span></li>'}</ul>
       </div>`;
   }).join('');
 }
