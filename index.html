@@ -191,6 +191,13 @@
     animation: slide .4s cubic-bezier(.22,1.2,.4,1) both;
   }
   @keyframes slide { from { opacity: 0; transform: translateX(-24px) } to { opacity: 1; transform: none } }
+  .qrow.lock { animation: qlock .46s ease both; }
+  @keyframes qlock {
+    0%   { transform: none; border-color: rgba(77,124,255,.30) }
+    35%  { transform: scale(1.035); border-color: var(--gold); box-shadow: 0 0 26px rgba(255,192,70,.22) }
+    100% { transform: none; border-color: rgba(77,124,255,.30) }
+  }
+  .qteam, .qcap { transition: none; }
   .qnum { font-size: 27px; font-weight: 800; color: var(--gold); min-width: 44px; text-align: center; }
   .qteam { font-weight: 800; font-size: 19px; white-space: nowrap; }
   .qcap { color: var(--dim); font-size: 14px; margin-left: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -508,54 +515,59 @@ function dealCard(teamIndex) {
   }, 1900);
 }
 
-/* ---------- порядок защиты ---------- */
-function queueHTML(list) {
-  return list.map((ti, pos) => {
-    const t = teams[ti];
-    const cap = t && t.captain ? t.captain.name : '';
-    return `<li class="qrow" style="animation-delay:${pos * 55}ms">
-        <span class="qnum">${pos + 1}</span>
-        <span class="qteam">Команда ${ti + 1}</span>
-        <span class="qcap">${esc(cap)}</span>
-      </li>`;
-  }).join('');
-}
-
+/* ---------- порядок защиты ----------
+   Каркас строится один раз, дальше меняется только текст внутри строк.
+   Если перерисовывать весь список на каждом тике, у строк заново стартует
+   анимация въезда и всё дёргается. */
 function showOrder(fresh) {
   if (!teams.length) return;
   const idx = teams.map((_, i) => i);
   const curtain = document.createElement('div');
   curtain.className = 'curtain';
+  curtain.innerHTML = `<div class="who">Порядок защиты</div>
+    <ol class="queue">${idx.map((_, pos) => `
+      <li class="qrow" style="animation-delay:${pos * 45}ms">
+        <span class="qnum">${pos + 1}</span>
+        <span class="qteam"></span>
+        <span class="qcap"></span>
+      </li>`).join('')}</ol>
+    <div class="qhint" style="visibility:hidden">Нажми в любом месте, чтобы закрыть
+      <button class="again">перетянуть</button></div>`;
   document.body.appendChild(curtain);
 
-  const paint = (list, done) => {
-    curtain.innerHTML = `<div class="who">Порядок защиты</div>
-      <ol class="queue">${queueHTML(list)}</ol>` +
-      (done ? `<div class="qhint">Нажми в любом месте, чтобы закрыть
-        <button class="again">перетянуть</button></div>` : '');
-  };
+  const rows = [...curtain.querySelectorAll('.qrow')];
+  const fill = list => list.forEach((ti, pos) => {
+    rows[pos].querySelector('.qteam').textContent = `Команда ${ti + 1}`;
+    rows[pos].querySelector('.qcap').textContent = (teams[ti] && teams[ti].captain) ? teams[ti].captain.name : '';
+  });
 
   const finish = () => {
+    curtain.querySelector('.qhint').style.visibility = 'visible';
     curtain.onclick = e => {
       curtain.remove();
       if (e.target.closest('.again')) showOrder(true);
     };
   };
 
-  if (!fresh && order && order.length === teams.length) { paint(order, true); finish(); return; }
+  // уже вытянуто заранее — показываем как есть, без барабана
+  if (!fresh && order && order.length === teams.length) { fill(order); finish(); return; }
 
   let ticks = 0;
   const timer = setInterval(() => {
-    paint(shuffle(idx, Math.random), false);
-    if (++ticks >= 12) {
+    fill(shuffle(idx, Math.random));
+    if (++ticks >= 16) {
       clearInterval(timer);
       order = shuffle(idx, Math.random);
       saveOrder();
-      paint(order, true);
+      fill(order);
+      rows.forEach((r, i) => setTimeout(() => {
+        r.classList.add('lock');
+        setTimeout(() => r.classList.remove('lock'), 460);
+      }, i * 90));
       render();
       finish();
     }
-  }, 110);
+  }, 85);
 }
 
 function spinThen(done) {
