@@ -42,7 +42,7 @@
   }
   .sub { margin-top: 12px; color: var(--dim); font-size: 17px; }
 
-  .console { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: center; margin: 28px 0 8px; }
+  .console { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; margin: 28px 0 8px; }
 
   button {
     font: inherit; font-weight: 600; cursor: pointer;
@@ -50,7 +50,7 @@
     background: var(--card); color: var(--ink); padding: 13px 20px; transition: .15s;
   }
   button:hover:not(:disabled) { border-color: #43435c; transform: translateY(-1px); }
-  button:disabled { opacity: .45; cursor: not-allowed; }
+  button:disabled { opacity: .4; cursor: not-allowed; }
 
   .go {
     background: linear-gradient(95deg, var(--hot), #ff8a3d); border: none; color: #fff;
@@ -58,21 +58,22 @@
     padding: 17px 44px; border-radius: 14px; box-shadow: 0 10px 34px rgba(255,92,57,.36);
   }
   .go:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 14px 42px rgba(255,92,57,.46); }
-
   .pull { border-color: rgba(53,208,127,.4); color: var(--ok); }
+  .danger { border-color: rgba(255,92,57,.35); color: var(--hot); }
 
   .field { display: flex; align-items: center; gap: 9px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 9px 15px; }
   .field label { color: var(--dim); font-size: 14px; }
   .field input { width: 58px; background: transparent; border: none; color: var(--ink); font: 700 18px/1 inherit; text-align: center; outline: none; }
 
-  .tally { display: flex; gap: 26px; justify-content: center; flex-wrap: wrap; color: var(--dim); font-size: 14px; margin-bottom: 26px; }
+  .tally { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; color: var(--dim); font-size: 14px; margin-bottom: 26px; }
   .tally b { color: var(--ink); font-size: 17px; }
   .tally .warn { color: var(--gold); }
 
-  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)); }
 
   .team {
     background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px;
+    display: flex; flex-direction: column;
     opacity: 0; transform: translateY(14px) scale(.98);
     animation: drop .42s cubic-bezier(.22,1.2,.4,1) forwards;
   }
@@ -84,7 +85,7 @@
   .team h2 a:hover { color: var(--cool); }
   .team .n { color: var(--dim); font-size: 13px; font-weight: 600; }
 
-  .roster { list-style: none; margin: 14px 0 0; padding: 0; }
+  .roster { list-style: none; margin: 14px 0 0; padding: 0; flex: 1; }
   .person { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-top: 1px solid rgba(255,255,255,.05); font-size: 15px; }
   .person:first-child { border-top: none; }
   .person .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -97,6 +98,82 @@
 
   .spin { color: var(--dim); font-family: ui-monospace, monospace; }
 
+  /* ---------- пасхалка на карточке команды ---------- */
+  .take {
+    margin-top: 14px; width: 100%; padding: 11px;
+    border-style: dashed; border-color: #3a3a55; color: var(--dim); font-size: 14px;
+  }
+  .take:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); transform: none; }
+
+  .egg {
+    margin-top: 14px; position: relative; display: flex; gap: 12px; align-items: center;
+    background: linear-gradient(135deg, rgba(255,192,70,.10), rgba(255,92,57,.08));
+    border: 1px solid rgba(255,192,70,.30); border-radius: 12px; padding: 11px 13px;
+    animation: pop .45s cubic-bezier(.22,1.3,.4,1) both;
+  }
+  @keyframes pop { from { opacity: 0; transform: scale(.9) } to { opacity: 1; transform: none } }
+  .egg svg { width: 42px; height: 42px; flex: none; }
+  .eggtext { min-width: 0; }
+  .eggname { font-weight: 800; font-size: 15px; color: var(--gold); }
+  .eggdesc { font-size: 12px; color: var(--dim); line-height: 1.35; margin-top: 2px; }
+
+  /* режим «рубашкой вверх»: со сцены не прочитать, наведением видно */
+  body.masked .egg > * { opacity: 0; transition: opacity .15s; }
+  body.masked .egg::after {
+    content: "карта взята"; position: absolute; inset: 0;
+    display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--dim);
+    background: repeating-linear-gradient(45deg, #1b1b2b 0 8px, #212133 8px 16px);
+    border-radius: 11px;
+  }
+  body.masked .egg:hover > * { opacity: 1; }
+  body.masked .egg:hover::after { opacity: 0; pointer-events: none; }
+
+  /* ---------- полноэкранная выдача карты ---------- */
+  .curtain {
+    position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;
+    background: rgba(5,5,11,.94); backdrop-filter: blur(3px);
+    animation: fade .25s both;
+  }
+  @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+  .curtain .who { position: absolute; top: 7vh; font-size: clamp(22px,4vw,40px); font-weight: 800; letter-spacing: -.02em; }
+
+  .deckbox { position: relative; width: 250px; height: 340px; }
+  .back {
+    position: absolute; inset: 0; border-radius: 20px;
+    background: linear-gradient(135deg, #1d1d2e, #2e2e48);
+    border: 2px solid #3d3d5c; box-shadow: 0 24px 60px rgba(0,0,0,.65);
+    animation: shuf .62s ease-in-out infinite;
+  }
+  .back::after {
+    content: ""; position: absolute; inset: 14px; border-radius: 12px;
+    background: repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 9px, transparent 9px 18px);
+    border: 1px solid rgba(255,255,255,.09);
+  }
+  @keyframes shuf {
+    0%   { transform: none }
+    25%  { transform: translate(-100px,-26px) rotate(-15deg) }
+    50%  { transform: none }
+    75%  { transform: translate(100px,26px) rotate(15deg) }
+    100% { transform: none }
+  }
+
+  .reveal {
+    width: min(88vw, 430px); text-align: center; padding: 34px 30px;
+    background: linear-gradient(160deg, #1a1a2a, #14141f);
+    border: 2px solid var(--gold); border-radius: 24px;
+    box-shadow: 0 0 70px rgba(255,192,70,.28), 0 30px 70px rgba(0,0,0,.6);
+    animation: flip .55s cubic-bezier(.2,1.2,.4,1) both;
+  }
+  @keyframes flip {
+    from { transform: rotateY(90deg) scale(.85); opacity: 0 }
+    to   { transform: none; opacity: 1 }
+  }
+  .reveal svg { width: 132px; height: 132px; }
+  .reveal .rname { font-size: clamp(26px,4.5vw,38px); font-weight: 800; margin: 14px 0 10px; letter-spacing: -.02em; color: var(--gold); }
+  .reveal .rdesc { color: var(--ink); opacity: .82; font-size: 16px; line-height: 1.45; }
+  .reveal .rhint { color: var(--dim); font-size: 13px; margin-top: 18px; }
+
+  /* ---------- список участников ---------- */
   details.people { margin-top: 40px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
   details.people summary { cursor: pointer; font-weight: 700; color: var(--dim); }
   details.people summary:hover { color: var(--ink); }
@@ -120,9 +197,9 @@
 
   @media print {
     body { background: #fff; color: #000; }
-    body::before, .console, details.people, footer { display: none; }
+    body::before, .console, details.people, footer, .take, .curtain { display: none; }
     .team { border: 1px solid #ccc; break-inside: avoid; }
-    .team .nm, .team h2 { color: #000 !important; }
+    .team .nm, .team h2, .eggname { color: #000 !important; }
   }
 </style>
 </head>
@@ -142,6 +219,8 @@
       <input id="cnt" type="number" min="2" max="24" value="4">
     </div>
     <button class="go" id="go">Крутить</button>
+    <button id="mask">Рубашкой вверх</button>
+    <button class="danger" id="resetdeck">Сбросить колоду</button>
     <button id="copy">Скопировать состав</button>
     <button id="print">Распечатать</button>
   </div>
@@ -167,12 +246,13 @@
   </details>
 
   <footer>
-    Жеребьёвка честная и воспроизводимая: сид <code id="seedout">—</code>.
-    Тот же сид с тем же списком всегда даёт тот же результат.
+    Жеребьёвка воспроизводимая: сид <code id="seedout">—</code>. Тот же сид с тем же
+    списком даёт тот же результат. Составы и вытянутые карты переживают перезагрузку страницы.
   </footer>
 
 </div>
 
+<script src="deck.js"></script>
 <script>
 const ORG = 'mlops-summer-day-2026';
 const SHEET = '1GIsuqAtjAdVU7VJhHgqknojh20QKeWyHFNX_kUPFhts';
@@ -222,7 +302,7 @@ function shortLabel(text) {
   return '';
 }
 
-/* ---------- честный разбор CSV/TSV (в ячейках живут запятые в кавычках) ---------- */
+/* ---------- честный разбор CSV/TSV ---------- */
 function parseDelimited(text) {
   const delim = text.includes('\t') ? '\t' : ',';
   const rows = []; let row = [], cell = '', q = false;
@@ -241,46 +321,34 @@ function parseDelimited(text) {
   return rows.filter(r => r.some(c => c.trim()));
 }
 
-/* колонки таблицы: имя | логин | подписка | другое | ноутбук */
 function parse(text) {
-  const rows = parseDelimited(text);
   const out = [];
-  for (const r of rows) {
+  for (const r of parseDelimited(text)) {
     const cells = r.map(c => c.trim());
     const head = cells.join(' ').toLowerCase();
     if (head.includes('github') && (head.includes('имя') || head.includes('name'))) continue;
-
     const name = cells[0] || '';
     if (!name) continue;
-    let gh = (cells[1] || '').replace(/^https?:\/\/(www\.)?github\.com\//i, '').replace(/\/+$/, '').replace(/^@/, '');
-    // «Другое, укажу тут -->» само по себе смысла не несёт, вес даёт соседняя колонка
+    const gh = (cells[1] || '').replace(/^https?:\/\/(www\.)?github\.com\//i, '').replace(/\/+$/, '').replace(/^@/, '');
     const sub = cells.slice(2).join(' ').replace(/другое,?\s*укажу тут\s*-*>?/gi, ' ').trim();
     out.push({ name, gh, sub });
   }
   return out;
 }
 
-function serialize(people) {
-  return people.map(p => [p.name, p.gh, p.sub].join('\t')).join('\n');
-}
+function serialize(people) { return people.map(p => [p.name, p.gh, p.sub].join('\t')).join('\n'); }
 
 /* ---------- раскладка по командам ---------- */
 function assign(people, teamCount, seed) {
   const rand = rng(seed);
   const byTier = n => shuffle(people.filter(p => tierOf(p.sub) === n), rand);
   const heavy = byTier(1), paid = byTier(2), free = byTier(3);
-
   const teams = Array.from({ length: teamCount }, () => ({ captain: null, members: [] }));
 
-  // капитаны: сначала тяжёлые подписки, если не хватило — базовые, потом кто есть
   const pool = [...heavy, ...paid, ...free];
   const taken = new Set();
-  for (let i = 0; i < teamCount && i < pool.length; i++) {
-    teams[i].captain = pool[i];
-    taken.add(pool[i]);
-  }
+  for (let i = 0; i < teamCount && i < pool.length; i++) { teams[i].captain = pool[i]; taken.add(pool[i]); }
 
-  // остальных раздаём по кругу, слой за слоем — подписки размазываются ровно
   let cursor = 0;
   for (const layer of [heavy, paid, free]) {
     for (const p of layer) {
@@ -294,8 +362,13 @@ function assign(people, teamCount, seed) {
 
 /* ---------- состояние ---------- */
 let people = [], teams = [], seed = 0;
+let dealt = {};                       // индекс команды → id пасхалки
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+const cardById = id => DECK.find(c => c.id === id);
+const dealtIds = () => Object.values(dealt);
+const freeCards = () => DECK.filter(c => !dealtIds().includes(c.id));
+const saveDealt = () => localStorage.setItem('dealt', JSON.stringify(dealt));
 
 async function boot() {
   const saved = localStorage.getItem('people');
@@ -304,8 +377,10 @@ async function boot() {
     try { const r = await fetch('participants.json', { cache: 'no-store' }); if (r.ok) people = await r.json(); }
     catch (e) {}
   }
-  $('raw').value = serialize(people);
+  try { dealt = JSON.parse(localStorage.getItem('dealt') || '{}'); } catch (e) { dealt = {}; }
+  if (localStorage.getItem('masked') === '1') document.body.classList.add('masked');
 
+  $('raw').value = serialize(people);
   const hash = new URLSearchParams(location.hash.slice(1));
   const n = parseInt(hash.get('n'), 10);
   const s = parseInt(hash.get('seed'), 10);
@@ -319,14 +394,13 @@ function countUp() {
   const t1 = people.filter(p => tierOf(p.sub) === 1).length;
   const t2 = people.filter(p => tierOf(p.sub) === 2).length;
   const n = parseInt($('cnt').value, 10) || 4;
-  const warn = t1 < n
-    ? `<span class="warn">Тяжёлых подписок ${t1} — ${n - t1} капитан(ов) возьмём из базовых</span>`
-    : '';
+  const warn = t1 < n ? `<span class="warn">Тяжёлых подписок ${t1} — ${n - t1} капитан(ов) возьмём из базовых</span>` : '';
   $('tally').innerHTML =
     `<span><b>${people.length}</b> участников</span>` +
     `<span><b>${t1}</b> с тяжёлой подпиской</span>` +
     `<span><b>${t2}</b> с базовой</span>` +
     `<span><b>${people.length - t1 - t2}</b> на бесплатных</span>` +
+    `<span>в колоде <b>${freeCards().length}</b> из ${DECK.length} карт</span>` +
     (warn ? `<span>${warn}</span>` : '');
   $('go').disabled = people.length === 0;
 }
@@ -335,8 +409,25 @@ function personHTML(p, isCap) {
   const tier = tierOf(p.sub), lbl = shortLabel(p.sub);
   const tag = (tier < 3 && lbl) ? `<span class="tag t${tier}">${esc(lbl)}</span>` : '';
   return `<li class="person${isCap ? ' captain' : ''}" title="${esc(p.sub || 'без подписки')}">
-      <span class="nm">${isCap ? '👑 ' : ''}${esc(p.name)}</span>${tag}
-    </li>`;
+      <span class="nm">${isCap ? '👑 ' : ''}${esc(p.name)}</span>${tag}</li>`;
+}
+
+function eggHTML(i) {
+  const id = dealt[i];
+  if (!id) {
+    const empty = freeCards().length === 0;
+    return `<button class="take" data-team="${i}" ${empty ? 'disabled' : ''}>${
+      empty ? 'Колода пуста' : '🃏 Взять карту пасхалки'}</button>`;
+  }
+  const c = cardById(id);
+  if (!c) return '';
+  return `<div class="egg" title="${esc(c.desc)}">
+      <svg viewBox="0 0 64 64">${c.art}</svg>
+      <div class="eggtext">
+        <div class="eggname">${esc(c.emoji)} ${esc(c.name)}</div>
+        <div class="eggdesc">${esc(c.desc)}</div>
+      </div>
+    </div>`;
 }
 
 function render() {
@@ -349,22 +440,55 @@ function render() {
           <a href="https://github.com/${ORG}/team-${num}" target="_blank" rel="noopener">team-${num}</a></h2>
         <span class="n">${(t.captain ? 1 : 0) + t.members.length} человек</span>
         <ul class="roster">${roster || '<li class="person"><span class="nm spin">пусто</span></li>'}</ul>
+        ${eggHTML(i)}
       </div>`;
   }).join('');
+}
+
+/* ---------- выдача карты: перемешали и показали ---------- */
+let dealing = false;
+
+function dealCard(teamIndex) {
+  if (dealing || dealt[teamIndex]) return;
+  const pool = freeCards();
+  if (!pool.length) return;
+  dealing = true;
+
+  // карту резервируем сразу, до анимации: иначе двойной клик выдаст её дважды,
+  // а закрытая посреди анимации вкладка потеряет результат
+  const chosen = pool[Math.floor(Math.random() * pool.length)];
+  dealt[teamIndex] = chosen.id;
+  saveDealt();
+
+  const curtain = document.createElement('div');
+  curtain.className = 'curtain';
+  curtain.innerHTML = `<div class="who">Команда ${teamIndex + 1} тянет карту</div>
+    <div class="deckbox">${Array.from({ length: 7 }, (_, k) =>
+      `<div class="back" style="animation-delay:${k * -80}ms"></div>`).join('')}</div>`;
+  document.body.appendChild(curtain);
+
+  setTimeout(() => {
+    curtain.innerHTML = `<div class="who">Команда ${teamIndex + 1}</div>
+      <div class="reveal">
+        <svg viewBox="0 0 64 64">${chosen.art}</svg>
+        <div class="rname">${esc(chosen.emoji)} ${esc(chosen.name)}</div>
+        <div class="rdesc">${esc(chosen.desc)}</div>
+        <div class="rhint">Зарыть в продукт незаметно. Раскрытие — на защите. Нажми, чтобы закрыть</div>
+      </div>`;
+    curtain.onclick = () => { curtain.remove(); dealing = false; render(); countUp(); };
+  }, 1900);
 }
 
 function spinThen(done) {
   const n = parseInt($('cnt').value, 10) || 4;
   const names = people.map(p => p.name);
   const pick = () => names[Math.floor(Math.random() * names.length)] || '···';
-
   $('grid').innerHTML = Array.from({ length: n }, (_, i) =>
     `<div class="team" style="animation-delay:${i * 30}ms">
        <h2><span>Команда ${i + 1}</span></h2>
        <ul class="roster">${Array.from({ length: 6 }, () =>
          `<li class="person"><span class="nm spin">${esc(pick())}</span></li>`).join('')}</ul>
      </div>`).join('');
-
   const timer = setInterval(() => {
     document.querySelectorAll('.spin').forEach(el => { el.textContent = pick(); });
   }, 70);
@@ -374,6 +498,10 @@ function spinThen(done) {
 function draw(animate = true) {
   const n = Math.max(2, Math.min(24, parseInt($('cnt').value, 10) || 4));
   $('cnt').value = n;
+  // карты команд, которых больше нет, возвращаются в колоду
+  Object.keys(dealt).forEach(k => { if (+k >= n) delete dealt[k]; });
+  saveDealt();
+
   teams = assign(people, n, seed);
   $('seedout').textContent = seed;
   location.hash = `seed=${seed}&n=${n}`;
@@ -389,6 +517,11 @@ function draw(animate = true) {
 }
 
 /* ---------- кнопки ---------- */
+$('grid').addEventListener('click', e => {
+  const b = e.target.closest('.take');
+  if (b && !b.disabled) dealCard(+b.dataset.team);
+});
+
 $('pull').onclick = async () => {
   const b = $('pull'); const was = b.textContent;
   b.disabled = true; b.textContent = 'Тяну…';
@@ -419,13 +552,22 @@ $('go').onclick = () => {
 
 $('cnt').onchange = () => { countUp(); if (teams.length) draw(false); };
 
+$('mask').onclick = () => {
+  const on = document.body.classList.toggle('masked');
+  localStorage.setItem('masked', on ? '1' : '0');
+  $('mask').textContent = on ? 'Показать пасхалки' : 'Рубашкой вверх';
+};
+
+$('resetdeck').onclick = () => {
+  const n = dealtIds().length;
+  if (!n) { alert('Колода и так полная — ни одной карты пока не взяли.'); return; }
+  if (!confirm(`Вернуть в колоду все ${n} выданных карт? Команды и составы останутся на месте.`)) return;
+  dealt = {}; saveDealt(); render(); countUp();
+};
+
 $('apply').onclick = () => {
   const parsed = parse($('raw').value);
-  if (!parsed.length) {
-    $('status').className = 'note bad';
-    $('status').textContent = 'Не нашёл ни одной строки.';
-    return;
-  }
+  if (!parsed.length) { $('status').className = 'note bad'; $('status').textContent = 'Не нашёл ни одной строки.'; return; }
   people = parsed;
   localStorage.setItem('people', JSON.stringify(people));
   countUp();
@@ -449,6 +591,8 @@ $('copy').onclick = () => {
     const lines = [`Команда ${i + 1}`];
     if (t.captain) lines.push(`  капитан: ${t.captain.name}${t.captain.gh ? ' (' + t.captain.gh + ')' : ''}`);
     t.members.forEach(p => lines.push(`  ${p.name}${p.gh ? ' (' + p.gh + ')' : ''}`));
+    const c = cardById(dealt[i]);
+    if (c) lines.push(`  пасхалка: ${c.name}`);
     return lines.join('\n');
   }).join('\n\n') + `\n\nсид: ${seed}`;
   navigator.clipboard.writeText(text).then(() => {
@@ -459,6 +603,7 @@ $('copy').onclick = () => {
 
 $('print').onclick = () => window.print();
 
+if (localStorage.getItem('masked') === '1') $('mask').textContent = 'Показать пасхалки';
 boot();
 </script>
 </body>
