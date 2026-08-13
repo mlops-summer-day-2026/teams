@@ -567,11 +567,27 @@ $('mask').onclick = () => {
   $('mask').textContent = on ? 'Показать пасхалки' : 'Рубашкой вверх';
 };
 
+/* сброс — в два нажатия, без системного диалога: на проекторе он смотрится чужеродно,
+   а случайный одиночный клик не должен разом обнулять всю колоду */
+let resetArmed = false, resetTimer = null;
+
+function flashBtn(btn, text, back = 'Сбросить колоду') {
+  btn.textContent = text;
+  setTimeout(() => { btn.textContent = back; }, 1800);
+}
+
 $('resetdeck').onclick = () => {
   const n = dealtIds().length;
-  if (!n) { alert('Колода и так полная — ни одной карты пока не взяли.'); return; }
-  if (!confirm(`Вернуть в колоду все ${n} выданных карт? Команды и составы останутся на месте.`)) return;
+  if (!n) { flashBtn($('resetdeck'), 'Колода и так полная'); return; }
+  if (!resetArmed) {
+    resetArmed = true;
+    $('resetdeck').textContent = `Точно? Вернуть ${n} карт`;
+    resetTimer = setTimeout(() => { resetArmed = false; $('resetdeck').textContent = 'Сбросить колоду'; }, 4000);
+    return;
+  }
+  clearTimeout(resetTimer); resetArmed = false;
   dealt = {}; saveDealt(); render(); countUp();
+  flashBtn($('resetdeck'), 'Колода собрана заново');
 };
 
 $('apply').onclick = () => {
