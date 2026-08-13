@@ -203,6 +203,15 @@
   .qcap { color: var(--dim); font-size: 14px; margin-left: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .qhint { position: absolute; bottom: 5vh; color: var(--dim); font-size: 13px; }
   .qhint button { padding: 6px 12px; font-size: 13px; margin-left: 8px; }
+
+  /* ручная правка порядка: стрелками, а не перетаскиванием — мышью на проекторе надёжнее */
+  .qmove { display: flex; flex-direction: column; gap: 3px; margin-left: 14px; flex: none; }
+  .qmove button {
+    padding: 0 9px; font-size: 11px; line-height: 17px; border-radius: 6px;
+    color: var(--dim); background: rgba(255,255,255,.04); border-color: transparent;
+  }
+  .qmove button:hover:not(:disabled) { color: var(--ink); background: rgba(255,255,255,.10); transform: none; }
+  .qmove button:disabled { opacity: .18; }
   .qbadge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(77,124,255,.20); color: #8fabff; white-space: nowrap; }
 
   /* ---------- список участников ---------- */
@@ -530,8 +539,13 @@ function showOrder(fresh) {
         <span class="qnum">${pos + 1}</span>
         <span class="qteam"></span>
         <span class="qcap"></span>
+        <span class="qmove" style="visibility:hidden">
+          <button data-mv="up" data-pos="${pos}" ${pos === 0 ? 'disabled' : ''} title="выше">▲</button>
+          <button data-mv="down" data-pos="${pos}" ${pos === idx.length - 1 ? 'disabled' : ''} title="ниже">▼</button>
+        </span>
       </li>`).join('')}</ol>
-    <div class="qhint" style="visibility:hidden">Нажми в любом месте, чтобы закрыть
+    <div class="qhint" style="visibility:hidden">Стрелками можно поправить руками ·
+      нажми мимо списка, чтобы закрыть
       <button class="again">перетянуть</button></div>`;
   document.body.appendChild(curtain);
 
@@ -543,9 +557,28 @@ function showOrder(fresh) {
 
   const finish = () => {
     curtain.querySelector('.qhint').style.visibility = 'visible';
+    curtain.querySelectorAll('.qmove').forEach(m => { m.style.visibility = 'visible'; });
+
     curtain.onclick = e => {
+      // ручная перестановка соседних строк — окно при этом не закрывается
+      const mv = e.target.closest('[data-mv]');
+      if (mv) {
+        e.stopPropagation();
+        const from = +mv.dataset.pos;
+        const to = mv.dataset.mv === 'up' ? from - 1 : from + 1;
+        if (to < 0 || to >= order.length) return;
+        [order[from], order[to]] = [order[to], order[from]];
+        saveOrder();
+        fill(order);
+        render();
+        [from, to].forEach(p => {
+          rows[p].classList.add('lock');
+          setTimeout(() => rows[p].classList.remove('lock'), 460);
+        });
+        return;
+      }
+      if (e.target.closest('.again')) { curtain.remove(); showOrder(true); return; }
       curtain.remove();
-      if (e.target.closest('.again')) showOrder(true);
     };
   };
 
